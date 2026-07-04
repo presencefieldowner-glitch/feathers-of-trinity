@@ -1,0 +1,21 @@
+node_modules/
+dist/
+*.log
+
+# Node/Prisma
+services/api/src/generated/
+services/api/src/db/prisma/dev.db
+services/api/src/db/prisma/dev.db-journal
+services/api/.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+engines/**/.pytest_cache/
+
+# Coverage
+coverage/
+.nyc_output/
+
+.DS_Store
