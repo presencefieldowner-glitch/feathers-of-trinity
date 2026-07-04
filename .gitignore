@@ -12,7 +12,7 @@ services/api/.env
 __pycache__/
 *.pyc
 .venv/
-core/**/.pytest_cache/
+engines/**/.pytest_cache/
 
 # Coverage
 coverage/

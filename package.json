@@ -1,0 +1,13 @@
+{
+  "name": "domain-node-platform",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "core/*"
+  ],
+  "scripts": {
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present"
+  }
+}
