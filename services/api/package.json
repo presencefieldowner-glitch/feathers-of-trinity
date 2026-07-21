@@ -11,6 +11,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"
   },
+  "prisma": {
+    "schema": "src/db/prisma/schema.prisma"
+  },
   "dependencies": {
     "@domain-node-platform/runtime-kernel": "*",
     "@prisma/client": "^5.20.0",
@@ -20,6 +23,7 @@
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2",
     "socket.io": "^4.7.5",
+    "stripe": "^22.3.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {

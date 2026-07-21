@@ -82,7 +82,8 @@ npm run typecheck                     # tsc --noEmit
 ### services/api
 ```
 cd services/api
-cp .env.example .env          # DATABASE_URL, JWT_SECRET, JWT_EXPIRES_IN, PORT
+cp .env.example .env          # DATABASE_URL, JWT_SECRET, JWT_EXPIRES_IN, PORT, STRIPE_SECRET_KEY,
+                               # STRIPE_WEBHOOK_SECRET (Stripe vars only needed for /payments/*)
 npm run prisma:generate       # generates client into src/generated/prisma (gitignored)
 npm run prisma:migrate        # applies/creates migrations against dev.db
 npm run dev                   # tsx watch src/server.ts
@@ -163,11 +164,32 @@ connect and then on a recurring interval (`RealtimeServerOptions.heartbeatInterv
 via the kernel's `Scheduler`, cancelled on disconnect. This is why `createRealtimeServer` now takes
 `prisma` as a parameter — it builds its own `AuthService` to call `touchSession`.
 
+### Payments module (`src/modules/payments/`)
+Real Stripe Checkout integration, same layered pattern as auth: `payments.routes.ts` →
+`payments.service.ts` (`PaymentsService`, Prisma queries + Stripe API calls) → `stripeClient.ts`
+(`getStripeClient()`/`getStripeWebhookSecret()`, read `STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET`).
+Both are resolved **lazily inside each route handler**, not at router-construction time — the app
+boots and every non-payments route works fine with no Stripe env vars set; only calling a payments
+endpoint without them configured fails, same lazy-fail pattern as `jwt.ts`'s `getSecret()`.
+`createApp(prisma, options)` takes an optional `options.stripe` to inject a Stripe client (used by
+`payments.routes.test.ts` to mock the API instead of hitting the real network).
+
+`POST /payments/checkout` (authenticated) creates a Stripe Checkout Session and a `Payment` row
+(`status: "pending"`), returns `{ paymentId, checkoutUrl }`. `GET /payments` (authenticated) lists
+the caller's own payments. `POST /payments/webhook` verifies the Stripe signature
+(`stripe.webhooks.constructEvent`) and flips a `Payment`'s status to `"completed"` or `"failed"`
+based on the event type. The webhook router is mounted in `app.ts` **before** the global
+`express.json()` middleware, using `express.raw()` scoped to that one route — Stripe signature
+verification needs the raw, unparsed body, and if the global JSON parser ran first it would have
+already consumed the request stream.
+
 ### Data model
 Prisma schema (`services/api/src/db/prisma/schema.prisma`) targets SQLite: `User` (email/password
 hash) has many `Session` (tracks `socketId`, `lastSeenAt`, `revokedAt` for revocation — see the
-session continuity note above for how `lastSeenAt` gets updated). The generated Prisma client lands
-in `src/generated/prisma` (gitignored, regenerate with `prisma:generate` after schema changes).
+session continuity note above for how `lastSeenAt` gets updated) and many `Payment` (tracks
+`stripeCheckoutSessionId`, `amount` in the smallest currency unit, `currency`, `status`). The
+generated Prisma client lands in `src/generated/prisma` (gitignored, regenerate with
+`prisma:generate` after schema changes).
 
 ## Conventions
 
@@ -179,8 +201,11 @@ in `src/generated/prisma` (gitignored, regenerate with `prisma:generate` after s
 - Domain-specific errors are modeled as `Error` subclasses per package (`KernelError` family in the
   kernel, `AuthError` family in the auth module) rather than generic thrown strings/objects.
 
-## Known CI caveat
+## CI
 
-`.github/workflows/webpack.yml` runs `npx webpack` on push/PR to `main` across Node 18/20/22, but no
-`webpack.config.js` or `webpack` dependency exists anywhere in the repo — treat this workflow as
-stale/unverified rather than a working build check.
+`.github/workflows/ci.yml` runs on push/PR to `main`: a `node` job (matrix 18.x/20.x/22.x) that
+installs, generates the Prisma client, runs every workspace's tests and build, and typechecks
+`core/runtime-kernel`; and a `python` job that runs `engines/intelligence` and `ecosystem`'s pytest
+suites and smoke-runs the `presence/` and `ecosystem/` demo scripts. It replaced an earlier
+`webpack.yml` workflow that ran `npx webpack` with no `webpack.config.js` or `webpack` dependency
+anywhere in the repo — that one never did anything real and was removed.
