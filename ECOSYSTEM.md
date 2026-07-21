@@ -15,15 +15,15 @@ Status legend:
 ```
 Presence Technology
 │
-├── LakeTiticaca Interpreter        [scaffolded — ecosystem/laketiticaca_interpreter.py]
-│   ├── Observation
-│   ├── Interpretation
+├── LakeTiticaca Interpreter        [partial — see below]
+│   ├── Observation                 → real (ecosystem/laketiticaca_interpreter.py)
+│   ├── Interpretation              → real (ecosystem/laketiticaca_interpreter.py)
 │   ├── Alignment
 │   ├── Reasoning
 │   ├── Knowledge Retrieval
 │   ├── Relationship Mapping
 │   ├── Inference
-│   ├── Response Construction
+│   ├── Response Construction       → real (ecosystem/laketiticaca_interpreter.py)
 │   └── Evolution
 │
 ├── Presence Engine                 [partial — see below]
@@ -143,16 +143,28 @@ intentionally simple, code. The remaining eight pieces live in
 directory's docs — not "Reality Engine," "Spatial Intelligence," or "Physical Presence" in any
 literal sense.
 
+**LakeTiticaca Interpreter** is marked "partial" for the same reason: `Observation`,
+`Interpretation`, and `Response Construction` have a small, real, rule-based implementation in
+`ecosystem/laketiticaca_interpreter.py` (`LakeTiticacaInterpreter`, chained end-to-end by `teach()`)
+— plain regex/string rules that catch a few things (doubled spaces, a missing capital letter at the
+start of a sentence, an accidentally repeated word) and construct a short corrected-text response.
+It is an original, from-scratch reconstruction of the general "interpret input, understand what's
+off, teach a correction" idea, built with this project's own logic — **not** connected to, derived
+from, or claiming parity with any third-party language-learning product's code, data, or models. The
+other six stages (`Alignment`, `Reasoning`, `Knowledge Retrieval`, `Relationship Mapping`,
+`Inference`, `Evolution`) are still explicit `NotImplementedError` placeholders. Run
+`python ecosystem/demo.py` to see it work.
+
 ## What "scaffolded" means here
 
-Every other branch — LakeTiticaca Interpreter, SAGE Framework, Quantum Audio, the Intelligence
-Layer, Visualization, Security, Developer Platform, and Presence OS — has a corresponding module in
-the standalone `ecosystem/` Python package (`ecosystem/README.md`), one class per branch with one
-method per sub-component named above. **Every one of those methods raises `NotImplementedError`,
-enforced by `ecosystem/tests/test_scaffold.py`.** This gives the full tree a 1:1 code location
-without claiming any of it does real work — it's a directory structure and a naming contract, not a
-functioning reasoning engine, math library, audio pipeline, AI layer, renderer, security system, or
-dev-tooling suite.
+Every other branch — SAGE Framework, Quantum Audio, the Intelligence Layer, Visualization, Security,
+Developer Platform, and Presence OS, plus the six unimplemented LakeTiticaca Interpreter stages
+above — has a corresponding module in the standalone `ecosystem/` Python package
+(`ecosystem/README.md`), one class per branch with one method per sub-component named above. **Every
+one of those methods raises `NotImplementedError`, enforced by `ecosystem/tests/test_scaffold.py`.**
+This gives the full tree a 1:1 code location without claiming any of it does real work — it's a
+directory structure and a naming contract, not a functioning reasoning engine, math library, audio
+pipeline, AI layer, renderer, security system, or dev-tooling suite.
 
 ## Security disclaimer
 
