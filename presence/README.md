@@ -36,4 +36,11 @@ cd presence/src
 python main.py
 ```
 
+The demo includes both a 4-RQubit run (full output) and a 1,000,000-RQubit
+run (summarized: count/timing only, since printing a million measurements
+isn't useful) -- both go through the same classical `MicroQuantumProcessor`,
+just at different `register_size`. The larger run is ~0.3s and ~1s to build
+on typical hardware; it's still a plain Python `list` of `RQubit` objects
+measured with `random.random()`, not a claim about real qubit counts.
+
 No dependencies beyond the Python standard library.
