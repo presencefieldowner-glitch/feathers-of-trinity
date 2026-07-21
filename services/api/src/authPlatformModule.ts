@@ -21,7 +21,7 @@ export function createAuthPlatformModule(options: AuthPlatformModuleOptions): Pl
     },
 
     async start() {
-      realtime = createRealtimeServer(httpServer);
+      realtime = createRealtimeServer(httpServer, prisma);
       await new Promise<void>((resolve) => httpServer.listen(port, resolve));
     },
 

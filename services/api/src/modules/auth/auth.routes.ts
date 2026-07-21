@@ -66,5 +66,18 @@ export function createAuthRouter(prisma: PrismaClient): Router {
     res.status(204).send();
   });
 
+  router.post(
+    "/sessions/:sessionId/heartbeat",
+    requireAuth,
+    async (req: AuthenticatedRequest, res) => {
+      const touched = await authService.touchSession(req.params.sessionId, req.auth!.userId);
+      if (!touched) {
+        res.status(404).json({ error: "Session not found" });
+        return;
+      }
+      res.status(204).send();
+    },
+  );
+
   return router;
 }

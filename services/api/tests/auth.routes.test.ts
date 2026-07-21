@@ -116,3 +116,59 @@ describe("POST /auth/sessions/:sessionId/revoke", () => {
     expect(stored?.revokedAt).not.toBeNull();
   });
 });
+
+describe("POST /auth/sessions/:sessionId/heartbeat", () => {
+  it("bumps lastSeenAt for the caller's own session", async () => {
+    const registerRes = await request(app).post("/auth/register").send(credentials);
+    const { token, session } = registerRes.body as { token: string; session: { id: string } };
+    const before = await prisma.session.findUniqueOrThrow({ where: { id: session.id } });
+
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    const res = await request(app)
+      .post(`/auth/sessions/${session.id}/heartbeat`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(204);
+    const after = await prisma.session.findUniqueOrThrow({ where: { id: session.id } });
+    expect(after.lastSeenAt.getTime()).toBeGreaterThan(before.lastSeenAt.getTime());
+  });
+
+  it("returns 404 for a session that isn't the caller's own", async () => {
+    const owner = await request(app).post("/auth/register").send(credentials);
+    const { session } = owner.body as { session: { id: string } };
+
+    const intruder = await request(app)
+      .post("/auth/register")
+      .send({ email: "intruder@example.com", password: "hunter2hunter" });
+    const { token: intruderToken } = intruder.body as { token: string };
+
+    const res = await request(app)
+      .post(`/auth/sessions/${session.id}/heartbeat`)
+      .set("Authorization", `Bearer ${intruderToken}`);
+
+    expect(res.status).toBe(404);
+  });
+
+  it("returns 404 for a revoked session", async () => {
+    const registerRes = await request(app).post("/auth/register").send(credentials);
+    const { token, session } = registerRes.body as { token: string; session: { id: string } };
+
+    await request(app)
+      .post(`/auth/sessions/${session.id}/revoke`)
+      .set("Authorization", `Bearer ${token}`);
+
+    const res = await request(app)
+      .post(`/auth/sessions/${session.id}/heartbeat`)
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(404);
+  });
+
+  it("rejects a request without a token with 401", async () => {
+    const registerRes = await request(app).post("/auth/register").send(credentials);
+    const { session } = registerRes.body as { session: { id: string } };
+
+    const res = await request(app).post(`/auth/sessions/${session.id}/heartbeat`);
+    expect(res.status).toBe(401);
+  });
+});

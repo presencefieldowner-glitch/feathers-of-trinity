@@ -48,6 +48,19 @@ export class AuthService {
     });
   }
 
+  /**
+   * Marks a session as continuously live by bumping lastSeenAt. Returns
+   * false (without erroring) if the session doesn't exist, isn't owned by
+   * userId, or has already been revoked -- callers decide how to respond.
+   */
+  async touchSession(sessionId: string, userId: string): Promise<boolean> {
+    const result = await this.prisma.session.updateMany({
+      where: { id: sessionId, userId, revokedAt: null },
+      data: { lastSeenAt: new Date() },
+    });
+    return result.count > 0;
+  }
+
   async revokeSession(sessionId: string, userId: string): Promise<void> {
     const session = await this.prisma.session.update({
       where: { id: sessionId },
@@ -70,7 +83,7 @@ export class AuthService {
       data: { userId: user.id },
     });
 
-    const token = signToken({ sub: user.id, email: user.email });
+    const token = signToken({ sub: user.id, email: user.email, sid: session.id });
 
     authEvents.emit("session:created", {
       sessionId: session.id,

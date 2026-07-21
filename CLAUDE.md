@@ -143,13 +143,24 @@ Standard layered structure: `auth.routes.ts` (Express router, Zod request valida
 state changes emit on the process-local `authEvents` bus (`realtime/authEvents.ts`), which
 `realtime/socket.ts` subscribes to in order to push `session:sync` events over Socket.IO to the
 per-user room (`user:<userId>`). Socket.IO connections are authenticated via the same JWT
-(`socket.handshake.auth.token`) as HTTP requests.
+(`socket.handshake.auth.token`) as HTTP requests. The JWT payload (`AuthTokenPayload`) carries
+`sub`/`email`/`sid` — `sid` is the session id, set when the token is issued in
+`AuthService.createSession` and read by the socket auth middleware to know which `Session` row a
+given connection belongs to.
+
+**Session continuity / heartbeat**: `Session.lastSeenAt` (set at creation) is kept live two ways —
+`AuthService.touchSession(sessionId, userId)` bumps it (no-ops, returning `false`, for a session
+that doesn't exist, isn't owned by that user, or is already revoked), exposed over HTTP as
+`POST /auth/sessions/:sessionId/heartbeat`, and automatically for any open Socket.IO connection: on
+connect and then on a recurring interval (`RealtimeServerOptions.heartbeatIntervalMs`, default 30s)
+via the kernel's `Scheduler`, cancelled on disconnect. This is why `createRealtimeServer` now takes
+`prisma` as a parameter — it builds its own `AuthService` to call `touchSession`.
 
 ### Data model
 Prisma schema (`services/api/src/db/prisma/schema.prisma`) targets SQLite: `User` (email/password
-hash) has many `Session` (tracks `socketId`, `lastSeenAt`, `revokedAt` for revocation). The generated
-Prisma client lands in `src/generated/prisma` (gitignored, regenerate with `prisma:generate` after
-schema changes).
+hash) has many `Session` (tracks `socketId`, `lastSeenAt`, `revokedAt` for revocation — see the
+session continuity note above for how `lastSeenAt` gets updated). The generated Prisma client lands
+in `src/generated/prisma` (gitignored, regenerate with `prisma:generate` after schema changes).
 
 ## Conventions
 
