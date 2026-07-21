@@ -108,6 +108,13 @@ service is expected to plug into:
 - `Scheduler` and `ResourceManager` are standalone utilities (interval/timeout task handles;
   semaphore-style concurrency limiting via `acquire()`/`withResource()`) — not wired into the kernel
   itself, used independently by modules that need them.
+- Also standalone, following the same pattern: `Telemetry` (in-memory counter/gauge store),
+  `Diagnostics` (registered named health checks, aggregated into a pass/fail report),
+  `PluginRuntime` (named-plugin registry, applies every plugin to a caller-supplied context), and
+  `WorkflowEngine` (topologically sorts named steps by `dependsOn` and runs them in order — same
+  cycle/unknown-dependency detection as module start-order resolution, but for ad hoc step
+  sequences rather than `PlatformModule`s). `Router` is a minimal in-process method+path dispatcher,
+  explicitly not a production API gateway — no auth, TLS, or transport of its own.
 
 ### services/api wiring
 `src/server.ts` is the composition root: it builds the Express app (`app.ts`), creates a

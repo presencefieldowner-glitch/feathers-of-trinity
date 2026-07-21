@@ -29,4 +29,6 @@ is an active participant in the system's behavior — contributing to, and depen
 ## Attribution
 
 This philosophy, and the platform built to express it, is credited to Joseph Michael Rounsaville,
-Project Lead, Rounsaville Technologies. See `README.md` for the full project vision and roadmap.
+Project Lead, Rounsaville Technologies. See `README.md` for the full project vision and roadmap,
+and `ECOSYSTEM.md` for the Presence Technology Ecosystem map — the longer-term structure this
+philosophy is organized toward, with an explicit accounting of what's built versus what's vision.
