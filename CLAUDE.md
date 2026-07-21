@@ -25,6 +25,7 @@ core/runtime-kernel/     TS lib: RuntimeKernel, KernelEventBus, Scheduler, Resou
 services/api/            Express API: auth module, Prisma/SQLite, Socket.IO realtime sync
 engines/intelligence/    Python/FastAPI service (standalone, not an npm workspace)
 presence/                Exploratory Python subsystem (standalone, not an npm workspace)
+ecosystem/               Placeholder scaffold for the wider Presence Technology Ecosystem vision
 .github/workflows/       CI (see caveat below)
 ```
 
@@ -35,6 +36,16 @@ concurrency limiter (`src/quantum/`), and a small pipeline plus historical/proje
 the runtime kernel — treat it as its own thing. Names like "RQubit," "MicroQuantum," and "temporal
 echo" are project-specific naming, not references to real quantum computing or biological sensing;
 each module and doc says so explicitly. Run its demo with `cd presence/src && python main.py`.
+
+`ecosystem/` (`ecosystem/README.md`) is a structural placeholder for `ECOSYSTEM.md`'s full vision
+tree — one Python module per branch (LakeTiticaca Interpreter, SAGE Framework, Quantum Audio,
+Intelligence Layer, Visualization, Security, Developer Platform, Presence OS), one method per named
+sub-component, and **every method raises `NotImplementedError`**, enforced by
+`ecosystem/tests/test_scaffold.py`. Nothing in it performs real work. `ecosystem/security.py`
+(`SecurityScaffold`) in particular is not a security system and must not be treated as one — the
+only real auth in this repo is the JWT flow in `services/api`'s auth module described above. Don't
+implement a placeholder method with anything beyond a toy/demo unless explicitly asked, and update
+`ecosystem/tests/test_scaffold.py` deliberately when you do.
 
 npm workspaces are declared in the root `package.json` as `services/*` and `core/*` only —
 `engines/intelligence` is a separate Python project with its own `requirements.txt`/`pytest.ini`

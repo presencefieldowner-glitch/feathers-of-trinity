@@ -5,10 +5,17 @@ kind of document as the original architecture tree in `README.md` — it names w
 headed, not what currently runs. Each branch below is marked with what actually exists in this
 repository today versus what is aspirational naming for future work.
 
+Status legend:
+- **implemented** — real, tested logic behind it.
+- **partial** — some sub-components are real; the rest are scaffolded or vision.
+- **scaffolded** — every sub-component has a placeholder in `ecosystem/` that explicitly raises
+  `NotImplementedError`. Nothing works yet; the structure exists so real work has somewhere to go.
+- **vision** — naming only, no code location yet.
+
 ```
 Presence Technology
 │
-├── LakeTiticaca Interpreter        [vision]
+├── LakeTiticaca Interpreter        [scaffolded — ecosystem/laketiticaca_interpreter.py]
 │   ├── Observation
 │   ├── Interpretation
 │   ├── Alignment
@@ -31,7 +38,7 @@ Presence Technology
 │   ├── Digital Presence
 │   └── Physical Presence
 │
-├── SAGE Framework                  [vision]
+├── SAGE Framework                  [scaffolded — ecosystem/sage_framework.py]
 │   ├── Algebra SAGE
 │   ├── Geometry SAGE
 │   ├── Mathematical SAGE
@@ -41,7 +48,7 @@ Presence Technology
 │   ├── Scientific Computing
 │   └── Prediction Engine
 │
-├── Quantum Audio                   [vision]
+├── Quantum Audio                   [scaffolded — ecosystem/quantum_audio.py]
 │   ├── Spatial Audio
 │   ├── Beamforming
 │   ├── Resonance Engine
@@ -51,7 +58,8 @@ Presence Technology
 │   ├── Presence Audio
 │   └── 360° Audio Runtime
 │
-├── Intelligence Layer              [vision — engines/intelligence is a bare FastAPI stub only]
+├── Intelligence Layer              [scaffolded — ecosystem/intelligence_layer.py; engines/intelligence
+│   │                                 is a separate, real (if minimal) FastAPI service]
 │   ├── Natural Language
 │   ├── Semantic Memory
 │   ├── Knowledge Graph
@@ -61,7 +69,7 @@ Presence Technology
 │   ├── Code Generation
 │   └── Research Assistant
 │
-├── Visualization                   [vision]
+├── Visualization                   [scaffolded — ecosystem/visualization.py]
 │   ├── Holographic UI
 │   ├── Reality Dashboard
 │   ├── 3D Maps
@@ -71,7 +79,7 @@ Presence Technology
 │   ├── Graph Engine
 │   └── Live Analytics
 │
-├── Security                        [vision — see disclaimer below]
+├── Security                        [scaffolded — ecosystem/security.py; see disclaimer below]
 │   ├── Presence Security
 │   ├── Tokey Token
 │   ├── Identity
@@ -90,7 +98,7 @@ Presence Technology
 │   ├── Telemetry            → Telemetry (core/runtime-kernel/src/telemetry.ts)
 │   └── Diagnostics          → Diagnostics (core/runtime-kernel/src/diagnostics.ts)
 │
-├── Developer Platform               [vision]
+├── Developer Platform               [scaffolded — ecosystem/developer_platform.py]
 │   ├── HTML Generator
 │   ├── Software Generator
 │   ├── API Generator
@@ -100,7 +108,7 @@ Presence Technology
 │   ├── Testing
 │   └── Deployment
 │
-└── Presence OS                      [vision]
+└── Presence OS                      [scaffolded — ecosystem/presence_os.py]
     ├── Desktop
     ├── Mobile
     ├── Cloud
@@ -126,21 +134,41 @@ framework-agnostic TypeScript class with unit tests in `core/runtime-kernel/test
 - `Telemetry` is an in-memory counter/gauge store; `Diagnostics` runs a set of named health-check
   functions and aggregates pass/fail.
 
-**Presence Engine** is marked "partial" only because `presence/` (see its own `README.md`)
-prototypes two of its ten listed pieces — `Presence Runtime`-style signal aggregation
-(`PresenceEngine`) and something in the shape of an `Intent Engine` (`StateManager`'s intent
-gating). The other eight items under Presence Engine, and everything under `presence/src/quantum/`
-and `presence/src/daas/`, are explicitly classical/mock simulations per that directory's docs — not
-"Reality Engine," "Spatial Intelligence," or "Physical Presence" in any literal sense.
+**Presence Engine** is marked "partial" because `presence/` (see its own `README.md`) prototypes
+two of its ten listed pieces — `Presence Runtime`-style signal aggregation (`PresenceEngine`) and
+something in the shape of an `Intent Engine` (`StateManager`'s intent gating) — as real, if
+intentionally simple, code. The remaining eight pieces live in
+`ecosystem/presence_engine_extended.py` as explicit placeholders (see below), and everything under
+`presence/src/quantum/` and `presence/src/daas/` is explicitly classical/mock simulation per that
+directory's docs — not "Reality Engine," "Spatial Intelligence," or "Physical Presence" in any
+literal sense.
 
-Everything else in this tree — LakeTiticaca Interpreter, SAGE Framework, Quantum Audio, the
-Intelligence Layer, Visualization, Developer Platform, and Presence OS — is unimplemented vision
-naming, same status as the original `README.md` architecture tree.
+## What "scaffolded" means here
+
+Every other branch — LakeTiticaca Interpreter, SAGE Framework, Quantum Audio, the Intelligence
+Layer, Visualization, Security, Developer Platform, and Presence OS — has a corresponding module in
+the standalone `ecosystem/` Python package (`ecosystem/README.md`), one class per branch with one
+method per sub-component named above. **Every one of those methods raises `NotImplementedError`,
+enforced by `ecosystem/tests/test_scaffold.py`.** This gives the full tree a 1:1 code location
+without claiming any of it does real work — it's a directory structure and a naming contract, not a
+functioning reasoning engine, math library, audio pipeline, AI layer, renderer, security system, or
+dev-tooling suite.
 
 ## Security disclaimer
 
 The **Security** branch (Presence Security, Tokey Token, Identity, Authentication, Encryption,
-Trust Engine, Audit Layer) has **no implementation in this repository** beyond the standard JWT-
-based auth already documented in `CLAUDE.md` under `services/api`'s auth module. Nothing here
-should be read as a working encryption, identity, or trust system. Until there's a specific,
-reviewed implementation to point to, treat every item in this branch as unbuilt.
+Trust Engine, Audit Layer) is scaffolded in `ecosystem/security.py` as `SecurityScaffold` — every
+method there raises `NotImplementedError` and performs no real cryptography, identity verification,
+authentication, or trust evaluation. The only real authentication in this repository is the
+standard JWT-based auth already documented in `CLAUDE.md` under `services/api`'s auth module.
+Nothing under this branch should be read as, or wired into anything expecting, a working encryption,
+identity, or trust system. If it's ever implemented for real, it needs its own security review
+first.
+
+## Hardware-adjacent items
+
+Drone Operations and Satellite View (`Visualization`) and Robotics, XR, and Distributed Presence
+Network (`Presence OS`) name physical or networked systems this repository has no connection to.
+Their placeholders in `ecosystem/visualization.py` and `ecosystem/presence_os.py` are handled
+identically to every other scaffolded item — they raise `NotImplementedError` rather than
+simulating hardware or a network that doesn't exist here.
