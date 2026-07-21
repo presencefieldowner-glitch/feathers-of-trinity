@@ -13,3 +13,13 @@ export {
   ModuleLifecycleError,
   UnknownDependencyError,
 } from "./errors.js";
+export { Telemetry } from "./telemetry.js";
+export type { TelemetryValue } from "./telemetry.js";
+export { Diagnostics } from "./diagnostics.js";
+export type { DiagnosticCheck, DiagnosticResult, DiagnosticsReport } from "./diagnostics.js";
+export { DuplicatePluginError, PluginRuntime } from "./pluginRuntime.js";
+export type { Plugin } from "./pluginRuntime.js";
+export { CyclicWorkflowError, UnknownWorkflowStepError, WorkflowEngine } from "./workflowEngine.js";
+export type { WorkflowStep } from "./workflowEngine.js";
+export { Router, UnmatchedRouteError } from "./router.js";
+export type { RouteHandler } from "./router.js";

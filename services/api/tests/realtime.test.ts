@@ -19,7 +19,7 @@ beforeEach(async () => {
 
   const app = createApp(prisma);
   httpServer = createServer(app);
-  realtime = createRealtimeServer(httpServer);
+  realtime = createRealtimeServer(httpServer, prisma, { heartbeatIntervalMs: 25 });
 
   await new Promise<void>((resolve) => httpServer.listen(0, resolve));
   const { port } = httpServer.address() as AddressInfo;
@@ -106,5 +106,20 @@ describe("realtime session sync", () => {
     const event = (await syncEvent) as { type: string; sessionId: string };
     expect(event.type).toBe("revoked");
     expect(event.sessionId).toBe(session.id);
+  });
+
+  it("keeps a connected session's lastSeenAt continuously updated via the socket heartbeat", async () => {
+    const { token, session } = (await registerUser(
+      "continuity@example.com",
+      "hunter2hunter",
+    )) as unknown as { token: string; session: { id: string } };
+
+    const before = await prisma.session.findUniqueOrThrow({ where: { id: session.id } });
+
+    client = await connectSocket(token);
+    await new Promise((resolve) => setTimeout(resolve, 80));
+
+    const after = await prisma.session.findUniqueOrThrow({ where: { id: session.id } });
+    expect(after.lastSeenAt.getTime()).toBeGreaterThan(before.lastSeenAt.getTime());
   });
 });
