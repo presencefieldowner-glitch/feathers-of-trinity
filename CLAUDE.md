@@ -24,8 +24,17 @@ tree before referencing them.
 core/runtime-kernel/     TS lib: RuntimeKernel, KernelEventBus, Scheduler, ResourceManager, topology
 services/api/            Express API: auth module, Prisma/SQLite, Socket.IO realtime sync
 engines/intelligence/    Python/FastAPI service (standalone, not an npm workspace)
+presence/                Exploratory Python subsystem (standalone, not an npm workspace)
 .github/workflows/       CI (see caveat below)
 ```
+
+`presence/` is a separate, exploratory prototype (`presence/README.md`) — plain-stdlib Python
+modeling signal aggregation and intent-gating (`src/core/`), a classical mock "quantum" register and
+concurrency limiter (`src/quantum/`), and a small pipeline plus historical/projected data pairing
+(`src/daas/`). It has no dependencies and isn't wired into `services/api`, `engines/intelligence`, or
+the runtime kernel — treat it as its own thing. Names like "RQubit," "MicroQuantum," and "temporal
+echo" are project-specific naming, not references to real quantum computing or biological sensing;
+each module and doc says so explicitly. Run its demo with `cd presence/src && python main.py`.
 
 npm workspaces are declared in the root `package.json` as `services/*` and `core/*` only —
 `engines/intelligence` is a separate Python project with its own `requirements.txt`/`pytest.ini`
