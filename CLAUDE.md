@@ -40,12 +40,16 @@ each module and doc says so explicitly. Run its demo with `cd presence/src && py
 `ecosystem/` (`ecosystem/README.md`) is a structural placeholder for `ECOSYSTEM.md`'s full vision
 tree — one Python module per branch (LakeTiticaca Interpreter, SAGE Framework, Quantum Audio,
 Intelligence Layer, Visualization, Security, Developer Platform, Presence OS), one method per named
-sub-component, and **every method raises `NotImplementedError`**, enforced by
-`ecosystem/tests/test_scaffold.py`. Nothing in it performs real work. `ecosystem/security.py`
-(`SecurityScaffold`) in particular is not a security system and must not be treated as one — the
-only real auth in this repo is the JWT flow in `services/api`'s auth module described above. Don't
-implement a placeholder method with anything beyond a toy/demo unless explicitly asked, and update
-`ecosystem/tests/test_scaffold.py` deliberately when you do.
+sub-component, and **almost every method raises `NotImplementedError`**, enforced by
+`ecosystem/tests/test_scaffold.py`. The one exception: `laketiticaca_interpreter.py`'s
+`observation`/`interpretation`/`response_construction` (chained by `teach()`) are small, real,
+regex-based text-correction logic — an original reconstruction of "interpret input, understand
+what's off, teach a correction," not derived from or connected to any third-party product; its
+other six stages are still placeholders. Run `python demo.py` from `ecosystem/` to see it work.
+`ecosystem/security.py` (`SecurityScaffold`) in particular is not a security system and must not be
+treated as one — the only real auth in this repo is the JWT flow in `services/api`'s auth module
+described above. Don't implement a placeholder method with anything beyond a toy/demo unless
+explicitly asked, and update `ecosystem/tests/test_scaffold.py` deliberately when you do.
 
 npm workspaces are declared in the root `package.json` as `services/*` and `core/*` only —
 `engines/intelligence` is a separate Python project with its own `requirements.txt`/`pytest.ini`
