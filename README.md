@@ -242,6 +242,8 @@ The Domain Node Platform follows several guiding principles:
 
 Each capability is implemented as an independent module capable of interacting with the rest of the system through defined interfaces.
 
+See [`PHILOSOPHY.md`](./PHILOSOPHY.md) for the full statement of this design paradigm, credited to Joseph Michael Rounsaville.
+
 ---
 
 # Development Roadmap
