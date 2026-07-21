@@ -38,6 +38,14 @@ it work. The other six stages (`alignment`, `reasoning`,
 `knowledge_retrieval`, `relationship_mapping`, `inference`, `evolution`)
 are still `NotImplementedError` placeholders.
 
+Each instance also keeps a small **in-process history** (`self._issue_counts`,
+readable via `.history()`) of which issue types it has flagged before, so a
+repeat within the same session gets an extra "you've made this mistake
+before" note in `teach()`'s reply. This is plain per-instance dict state,
+scoped to one `LakeTiticacaInterpreter` object and reset by creating a new
+one -- not persisted anywhere, not shared across instances, and not a claim
+of general awareness or of anything resembling a real AI model.
+
 ## Security -- read this before touching `security.py`
 
 `SecurityScaffold` is not a security system. None of its methods perform

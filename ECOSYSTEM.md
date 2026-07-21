@@ -155,6 +155,12 @@ other six stages (`Alignment`, `Reasoning`, `Knowledge Retrieval`, `Relationship
 `Inference`, `Evolution`) are still explicit `NotImplementedError` placeholders. Run
 `python ecosystem/demo.py` to see it work.
 
+Each `LakeTiticacaInterpreter` instance also keeps a small in-process history of which issue types
+it has flagged before (readable via `.history()`), so a repeat within the same session gets a
+"you've made this mistake before" note appended to `teach()`'s reply. This is plain per-instance
+dict state — not persisted, not shared across instances, and not a claim of general awareness or a
+real AI model.
+
 ## What "scaffolded" means here
 
 Every other branch — SAGE Framework, Quantum Audio, the Intelligence Layer, Visualization, Security,

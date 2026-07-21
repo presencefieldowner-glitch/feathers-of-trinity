@@ -9,6 +9,12 @@ regex/string rules, no machine learning). It has no code, data, model, or
 API connection to any third-party product, and does not claim comparable
 quality or functionality to one.
 
+Each LakeTiticacaInterpreter instance keeps an in-process history of which
+issue types it has flagged before, so teach() can note a repeat ("you've
+made this mistake before this session"). This is plain per-instance state
+(a dict of counts), not a claim of general awareness, memory across
+processes, or anything resembling a real AI model.
+
 The other six stages -- Alignment, Reasoning, Knowledge Retrieval,
 Relationship Mapping, Inference, Evolution -- are still explicit
 placeholders that raise NotImplementedError, same as every other
@@ -17,6 +23,12 @@ ecosystem/ module (see README.md).
 
 import re
 from dataclasses import dataclass, field
+
+ISSUE_LABELS = {
+    "double_space": "doubled spaces",
+    "missing_capital": "missing capitalization",
+    "repeated_word": "a repeated word",
+}
 
 
 @dataclass
@@ -35,6 +47,9 @@ class Interpretation:
 
 
 class LakeTiticacaInterpreter:
+    def __init__(self) -> None:
+        self._issue_counts: dict[str, int] = {}
+
     def observation(self, text: str) -> Observation:
         issues = []
         if "  " in text:
@@ -80,8 +95,30 @@ class LakeTiticacaInterpreter:
         return f'Suggested correction: "{interpretation.corrected_text}" ({notes})'
 
     def teach(self, text: str) -> str:
-        """Runs observation -> interpretation -> response_construction end to end."""
-        return self.response_construction(self.interpretation(self.observation(text)))
+        """Runs observation -> interpretation -> response_construction end to end,
+        then appends a note if any flagged issue has been seen before this session."""
+        observation = self.observation(text)
+        reply = self.response_construction(self.interpretation(observation))
+        reminder = self._remember(observation.issues)
+        return f"{reply} {reminder}" if reminder else reply
+
+    def _remember(self, issues: list[str]) -> str:
+        repeats = []
+        for issue in issues:
+            seen_before = self._issue_counts.get(issue, 0)
+            self._issue_counts[issue] = seen_before + 1
+            if seen_before > 0:
+                label = ISSUE_LABELS.get(issue, issue)
+                times = seen_before + 1
+                repeats.append(f"{label} ({times}x this session)")
+        if not repeats:
+            return ""
+        return "Note: you've made this mistake before -- " + "; ".join(repeats) + "."
+
+    def history(self) -> dict[str, int]:
+        """Read-only snapshot of how many times each issue type has been flagged
+        by this interpreter instance so far this session."""
+        return dict(self._issue_counts)
 
     def alignment(self, *args, **kwargs):
         raise NotImplementedError("Alignment is not yet implemented")

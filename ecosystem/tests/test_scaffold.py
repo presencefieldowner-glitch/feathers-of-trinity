@@ -82,3 +82,33 @@ def test_laketiticaca_teach_is_real_and_actually_corrects_text():
 
     clean_reply = interpreter.teach("This is fine.")
     assert clean_reply == 'Looks good: "This is fine."'
+
+
+def test_laketiticaca_teach_remembers_repeated_issues_within_a_session():
+    interpreter = LakeTiticacaInterpreter()
+
+    first = interpreter.teach("this  is fine.")
+    assert "Note:" not in first
+
+    second = interpreter.teach("this  is also fine.")
+    assert second == (
+        'Suggested correction: "This is also fine." '
+        "(collapsed repeated spaces into one; capitalized the start of a sentence) "
+        "Note: you've made this mistake before -- doubled spaces (2x this session); "
+        "missing capitalization (2x this session)."
+    )
+
+    assert interpreter.history() == {"double_space": 2, "missing_capital": 2}
+
+
+def test_laketiticaca_history_is_per_instance():
+    shared_pattern = "this  has a problem."
+    first_interpreter = LakeTiticacaInterpreter()
+    second_interpreter = LakeTiticacaInterpreter()
+
+    first_interpreter.teach(shared_pattern)
+    first_interpreter.teach(shared_pattern)
+    reply = second_interpreter.teach(shared_pattern)
+
+    assert "Note:" not in reply
+    assert second_interpreter.history() == {"double_space": 1, "missing_capital": 1}
