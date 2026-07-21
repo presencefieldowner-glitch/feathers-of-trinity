@@ -201,8 +201,11 @@ generated Prisma client lands in `src/generated/prisma` (gitignored, regenerate 
 - Domain-specific errors are modeled as `Error` subclasses per package (`KernelError` family in the
   kernel, `AuthError` family in the auth module) rather than generic thrown strings/objects.
 
-## Known CI caveat
+## CI
 
-`.github/workflows/webpack.yml` runs `npx webpack` on push/PR to `main` across Node 18/20/22, but no
-`webpack.config.js` or `webpack` dependency exists anywhere in the repo — treat this workflow as
-stale/unverified rather than a working build check.
+`.github/workflows/ci.yml` runs on push/PR to `main`: a `node` job (matrix 18.x/20.x/22.x) that
+installs, generates the Prisma client, runs every workspace's tests and build, and typechecks
+`core/runtime-kernel`; and a `python` job that runs `engines/intelligence` and `ecosystem`'s pytest
+suites and smoke-runs the `presence/` and `ecosystem/` demo scripts. It replaced an earlier
+`webpack.yml` workflow that ran `npx webpack` with no `webpack.config.js` or `webpack` dependency
+anywhere in the repo — that one never did anything real and was removed.

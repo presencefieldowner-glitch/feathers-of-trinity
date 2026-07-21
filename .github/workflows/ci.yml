@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  node:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: npm
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Generate Prisma client
+      run: npm run prisma:generate
+      working-directory: services/api
+
+    - name: Test
+      run: npm test
+
+    - name: Build
+      run: npm run build
+
+    - name: Typecheck runtime-kernel
+      run: npm run typecheck
+      working-directory: core/runtime-kernel
+
+  python:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Test engines/intelligence
+      run: |
+        pip install -r requirements.txt
+        python -m pytest
+      working-directory: engines/intelligence
+
+    - name: Test ecosystem
+      run: |
+        pip install pytest
+        python -m pytest
+      working-directory: ecosystem
+
+    - name: Run presence demo
+      run: python main.py
+      working-directory: presence/src
+
+    - name: Run ecosystem demo
+      run: python demo.py
+      working-directory: ecosystem
