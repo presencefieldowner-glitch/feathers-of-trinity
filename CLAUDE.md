@@ -45,7 +45,10 @@ sub-component, and **almost every method raises `NotImplementedError`**, enforce
 `observation`/`interpretation`/`response_construction` (chained by `teach()`) are small, real,
 regex-based text-correction logic — an original reconstruction of "interpret input, understand
 what's off, teach a correction," not derived from or connected to any third-party product; its
-other six stages are still placeholders. Run `python demo.py` from `ecosystem/` to see it work.
+other six stages are still placeholders. Each instance also keeps a small in-process history of
+issue types it's flagged before (`.history()`), so `teach()` notes a repeat within the same
+session — plain per-instance dict state, not persistence or a claim of real awareness/AI. Run
+`python demo.py` from `ecosystem/` to see it work.
 `ecosystem/security.py` (`SecurityScaffold`) in particular is not a security system and must not be
 treated as one — the only real auth in this repo is the JWT flow in `services/api`'s auth module
 described above. Don't implement a placeholder method with anything beyond a toy/demo unless

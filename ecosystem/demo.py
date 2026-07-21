@@ -13,10 +13,12 @@ from laketiticaca_interpreter import LakeTiticacaInterpreter
 def main() -> None:
     interpreter = LakeTiticacaInterpreter()
 
-    for text in ["this  is a test test.", "This is fine."]:
+    for text in ["this  is a test test.", "This is fine.", "this  also has double spaces."]:
         print(f"input: {text!r}")
         print(f"reply: {interpreter.teach(text)}")
         print()
+
+    print(f"session history: {interpreter.history()}")
 
 
 if __name__ == "__main__":
