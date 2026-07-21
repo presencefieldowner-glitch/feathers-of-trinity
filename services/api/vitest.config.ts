@@ -12,6 +12,7 @@ export default defineConfig({
     env: {
       JWT_SECRET: "test-secret-key",
       JWT_EXPIRES_IN: "1h",
+      STRIPE_WEBHOOK_SECRET: "whsec_test_secret",
     },
     coverage: {
       provider: "v8",
